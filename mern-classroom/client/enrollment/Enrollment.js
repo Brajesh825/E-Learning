@@ -23,20 +23,39 @@ import Info from '@material-ui/icons/Info'
 import CheckCircle from '@material-ui/icons/CheckCircle'
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked'
 import { CardContent } from '@material-ui/core'
-// import { Viewer } from '@react-pdf-viewer/core';
 
 
-// import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
+const PDFViewer = ({ pdfStream }) => {
+  console.log(pdfStream);
+  useEffect(() => {
+    // Convert PDF stream into an ArrayBuffer
+    const arrayBuffer = pdfStream.data;
 
-// const PDFViewer = ({ pdfStream }) => {
-//   return (
-//     <div className="pdf-container">
-//       <Document file={{ data: pdfStream }}>
-//         <Page pageNumber={1} />
-//       </Document>
-//     </div>
-//   );
-// };
+    // Load PDF from the ArrayBuffer
+    window.pdfjsLib.getDocument({ data: arrayBuffer }).promise.then((pdf) => {
+      // Fetch the first page
+      pdf.getPage(1).then((page) => {
+        // Set up canvas and rendering context for the page
+        const canvas = document.getElementById('pdfCanvas');
+        const context = canvas.getContext('2d');
+        const viewport = page.getViewport({ scale: 1 });
+
+        // Set canvas dimensions
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        // Render PDF page on canvas
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport,
+        };
+        page.render(renderContext);
+      });
+    });
+  }, [pdfStream]);
+
+  return <canvas id="pdfCanvas"></canvas>;
+};
 
 
 const useStyles = makeStyles(theme => ({
@@ -309,7 +328,7 @@ export default function Enrollment({ match }) {
           <CardContent>
             <Typography variant="body1" className={classes.para}>{enrollment.course.lessons[values.drawer].content}</Typography>
           </CardContent>
-          {/* <PDFViewer pdfStream={enrollment.course.lessons[values.drawer].document} ></PDFViewer> */}
+          <PDFViewer pdfStream={enrollment.course.lessons[values.drawer].document} ></PDFViewer>
           <CardActions>
             <a href={enrollment.course.lessons[values.drawer].resource_url}><Button variant="contained" color="primary">Resource Link</Button></a>
           </CardActions>

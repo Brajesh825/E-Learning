@@ -1,5 +1,5 @@
-export default ({markup, css}) => {
-    return `<!doctype html>
+export default ({ markup, css }) => {
+  return `<!doctype html>
       <html lang="en">
         <head>
           <meta charset="utf-8">
@@ -20,6 +20,13 @@ export default ({markup, css}) => {
         <body style="margin:0">
           <div id="root">${markup}</div>
           <style id="jss-server-side">${css}</style>
+          <link href="
+https://cdn.jsdelivr.net/npm/pdfjs-dist@3.9.179/web/pdf_viewer.min.css
+" rel="stylesheet">
+
+          <script src="
+https://cdn.jsdelivr.net/npm/pdfjs-dist@3.9.179/build/pdf.min.js
+"></script>
           <script type="text/javascript" src="/dist/bundle.js"></script>
         </body>
       </html>`
