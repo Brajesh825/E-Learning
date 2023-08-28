@@ -43,6 +43,7 @@ const Register = props => {
                         initialValues={{
                             name: '',
                             username: '',
+                            email: '',
                             password: '',
                             password2: '',
                         }}
@@ -66,11 +67,11 @@ const Register = props => {
                             ),
                         })}
                         onSubmit={(
-                            { name, username, password, password2 },
+                            { name, username,email, password, password2 },
                             { setStatus, setSubmitting }
                         ) => {
                             setStatus();
-                            register(name, username, password, password2).then(
+                            register(name, username,email, password, password2).then(
                                 user => {
                                     const { from } = history.location.state || {
                                         from: { pathname: '/chat' },
@@ -110,6 +111,20 @@ const Register = props => {
                                     helperText={touched.name ? errors.name : ''}
                                     error={touched.name && Boolean(errors.name)}
                                     value={values.name}
+                                    onChange={handleChange}
+                                />
+                                <TextField
+                                    id="email"
+                                    className={classes.textField}
+                                    name="email"
+                                    label="email"
+                                    fullWidth={true}
+                                    variant="outlined"
+                                    margin="normal"
+                                    required={true}
+                                    helperText={touched.name ? errors.name : ''}
+                                    error={touched.email && Boolean(errors.email)}
+                                    value={values.email}
                                     onChange={handleChange}
                                 />
 

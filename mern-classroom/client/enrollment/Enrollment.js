@@ -23,39 +23,82 @@ import Info from '@material-ui/icons/Info'
 import CheckCircle from '@material-ui/icons/CheckCircle'
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked'
 import { CardContent } from '@material-ui/core'
+import { useRef } from 'react'
 
 
 const PDFViewer = ({ pdfStream }) => {
-  console.log(pdfStream);
+  const classes = useStyles()
+  const [pageNumber, setPageNumber] = useState(1);
+  const [numPages, setNumPages] = useState(0);
+  const [orientation, setOrientation] = useState('portrait');
+  const canvasRef = useRef(null);
+
+  const containerStyle = {
+    overflow: 'auto',
+    height: '600px',
+  };
+
   useEffect(() => {
-    // Convert PDF stream into an ArrayBuffer
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+
     const arrayBuffer = pdfStream.data;
 
-    // Load PDF from the ArrayBuffer
     window.pdfjsLib.getDocument({ data: arrayBuffer }).promise.then((pdf) => {
-      // Fetch the first page
-      pdf.getPage(1).then((page) => {
-        // Set up canvas and rendering context for the page
-        const canvas = document.getElementById('pdfCanvas');
-        const context = canvas.getContext('2d');
+      setNumPages(pdf.numPages);
+
+      pdf.getPage(pageNumber).then((page) => {
         const viewport = page.getViewport({ scale: 1 });
 
-        // Set canvas dimensions
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
+        let canvasWidth, canvasHeight;
 
-        // Render PDF page on canvas
+        if (orientation === 'landscape') {
+          canvasWidth = viewport.height;
+          canvasHeight = viewport.width;
+        } else {
+          canvasWidth = viewport.width;
+          canvasHeight = viewport.height;
+        }
+
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+
         const renderContext = {
           canvasContext: context,
-          viewport: viewport,
+          viewport: page.getViewport({ scale: canvasWidth / viewport.width }),
         };
         page.render(renderContext);
       });
     });
-  }, [pdfStream]);
+  }, [pdfStream, pageNumber, orientation]);
 
-  return <canvas id="pdfCanvas"></canvas>;
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= numPages) {
+      setPageNumber(newPage);
+    }
+  };
+
+  const toggleOrientation = () => {
+    setOrientation(orientation === 'portrait' ? 'landscape' : 'portrait');
+  };
+
+  return (
+    <div>
+      <div style={containerStyle}>
+        <canvas ref={canvasRef}></canvas>
+      </div>
+      <div>
+        <button className= {classes.navButton} onClick={() => handlePageChange(pageNumber - 1)}>Previous</button>
+        <span>Page {pageNumber} of {numPages}</span>
+        <button  className= {classes.navButton} onClick={() => handlePageChange(pageNumber + 1)}>Next</button>
+        <button  className= {classes.navButton} onClick={toggleOrientation}>Change Orientation</button>
+        <p>Orientation: {orientation}</p>
+      </div>
+    </div>
+  );
 };
+
+
 
 
 const useStyles = makeStyles(theme => ({
@@ -149,6 +192,11 @@ const useStyles = makeStyles(theme => ({
   },
   para: {
     whiteSpace: 'pre-wrap'
+  },
+  navButton: {
+    padding: "0.5rem",
+    borderRadius: "0.5rem",
+    marginRight: "0.5rem"
   }
 }))
 
